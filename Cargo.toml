@@ -1,0 +1,60 @@
+[package]
+name = "zk-ace"
+version = "0.4.0"
+edition = "2021"
+description = "ZK-ACE: Pluggable Zero-Knowledge Authorization with post-quantum and classical backends"
+license = "Apache-2.0"
+
+[features]
+default = ["stwo"]
+stwo = ["dep:stwo", "dep:stwo-constraint-framework", "dep:num-traits", "dep:bytemuck", "dep:itertools"]
+groth16 = ["dep:ark-ff", "dep:ark-bn254", "dep:ark-groth16", "dep:ark-snark", "dep:ark-relations", "dep:ark-r1cs-std", "dep:ark-serialize", "dep:ark-std"]
+
+[dependencies]
+# Core (always included)
+bincode = "1"
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+sha2 = "0.10"
+rand = "0.8"
+rand_chacha = "0.3"
+tracing = "0.1"
+
+# Stwo backend (feature-gated)
+stwo = { version = "2.2.0", features = ["prover"], optional = true }
+stwo-constraint-framework = { version = "2.2.0", features = ["prover"], optional = true }
+num-traits = { version = "0.2", optional = true }
+itertools = { version = "0.12", optional = true }
+bytemuck = { version = "1", optional = true }
+
+# Groth16 backend (feature-gated)
+ark-ff = { version = "0.4", optional = true }
+ark-bn254 = { version = "0.4", optional = true }
+ark-groth16 = { version = "0.4", optional = true }
+ark-snark = { version = "0.4", optional = true }
+ark-relations = { version = "0.4", optional = true }
+ark-r1cs-std = { version = "0.4", optional = true }
+ark-serialize = { version = "0.4", optional = true }
+ark-std = { version = "0.4", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = ["Performance", "Window"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "prove_verify_bench"
+harness = false
+required-features = ["stwo"]
+
+[[bench]]
+name = "groth16_bench"
+harness = false
+required-features = ["groth16"]
